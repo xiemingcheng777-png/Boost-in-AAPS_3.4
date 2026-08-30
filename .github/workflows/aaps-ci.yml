@@ -204,12 +204,19 @@ jobs:
         run: |
           mv app/build/outputs/apk/${{ env.VARIANT_FLAVOR }}/${{ env.VARIANT_TYPE }}/*.apk aaps-${{ env.VERSION }}${{ env.VERSION_SUFFIX }}.apk
           mv wear/build/outputs/apk/${{ env.VARIANT_FLAVOR }}/${{ env.VARIANT_TYPE }}/*.apk aaps-wear-${{ env.VERSION }}${{ env.VERSION_SUFFIX }}.apk
+      # 新增一步：先把 APK 找出来复制到根目录
+      - name: Find and Copy APK
+        run: |
+          # 创建一个新的存放目录
+          mkdir -p release_apks
+          # 在整个项目里搜索所有 .apk 文件，并复制出来
+          find . -name "*.apk" -type f -exec cp {} release_apks/ \;
+          # 打印一下我们找到了什么，方便调试
+          ls -la release_apks/
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: AAPS-Built-APK
-          path: app/build/outputs/apk/full/release/*.apk
-
-
-
-
+          # 直接上传刚才那个目录里的所有东西
+          path: release_apks/*
